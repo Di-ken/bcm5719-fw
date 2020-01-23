@@ -824,11 +824,9 @@ void Network_InitPort(NetworkPort_t *port)
     emacMode = port->device->EmacMode;
     emacMode.bits.EnableAPERXPath = 1;
     emacMode.bits.EnableAPETXPath = 1;
-
     emacMode.bits.EnableFHDE = 1;
     emacMode.bits.EnableTCE = 1; // Transmit DMA needed for APE to work properly
     emacMode.bits.EnableRDE = 1;
-
     emacMode.bits.KeepFrameInWOL = 1;
     emacMode.bits.MACLoopbackModeControl = 0;
     port->device->EmacMode = emacMode;
