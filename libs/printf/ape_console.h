@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// @file       ape_purchar.c
+/// @file       ape_console.h
 ///
 /// @project
 ///
@@ -10,7 +10,7 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// @copyright Copyright (c) 2019, Evan Lojewski
+/// @copyright Copyright (c) 2020, Evan Lojewski
 /// @cond
 ///
 /// All rights reserved.
@@ -42,31 +42,28 @@
 /// @endcond
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <printf.h>
-#include <ape_console.h>
-#include <APE_SHM.h>
+#ifndef APE_CONSOLE_H
+#define APE_CONSOLE_H
 
 
-void _putchar(char character)
-{
+#define CONSOLE        0
+
 #ifdef CONSOLE
-    uint32_t write_pointer = CONSOLE_PORT.RcpuWritePointer.r32;
-    uint32_t word_pointer = write_pointer / 4;
-    uint32_t byte_index = write_pointer % 4;
-    uint32_t byte_mask = 0xFF << (byte_index * 8);
-
-    uint32_t new_word = CONSOLE_PORT.RcpuPrintfBuffer[word_pointer].r32 & ~byte_mask;
-    new_word |= character << (byte_index * 8);
-    CONSOLE_PORT.RcpuPrintfBuffer[word_pointer].r32 = new_word;
-    write_pointer++;
-
-    if(write_pointer >= sizeof(CONSOLE_PORT.RcpuPrintfBuffer))
-    {
-        write_pointer = 0;
-    }
-
-    CONSOLE_PORT.RcpuWritePointer.r32 = write_pointer;
+#include <APE_SHM.h>
+#if CONSOLE == 0
+#define CONSOLE_PORT (SHM)
+#elif CONSOLE == 1
+#include <APE_SHM1.h>
+#define CONSOLE_PORT (SHM1)
+#elif CONSOLE == 2
+#include <APE_SHM2.h>
+#define CONSOLE_PORT (SHM2)
+#elif CONSOLE == 3
+#include <APE_SHM3.h>
+#define CONSOLE_PORT (SHM3)
 #else
-    (void)character;
+#error "Unsupported console port."
 #endif
-}
+#endif
+
+#endif /* APE_CONSOLE_H */

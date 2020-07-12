@@ -61,6 +61,7 @@
 #include <types.h>
 
 #ifndef CXX_SIMULATOR
+#include <ape_console.h>
 #include <printf.h>
 #endif
 
@@ -335,16 +336,18 @@ bool handle_reset(void)
 
 void __attribute__((noreturn)) __start()
 {
-    bool full_init = false;
-    if (handle_reset() || SHM.RcpuWritePointer.r32 > sizeof(SHM.RcpuPrintfBuffer) || SHM.RcpuReadPointer.r32 > sizeof(SHM.RcpuPrintfBuffer) ||
-        SHM.RcpuHostReadPointer.r32 > sizeof(SHM.RcpuPrintfBuffer))
+    bool full_init = handle_reset();
+#ifdef CONSOLE
+    if (CONSOLE_PORT.RcpuWritePointer.r32 > sizeof(CONSOLE_PORT.RcpuPrintfBuffer) || CONSOLE_PORT.RcpuReadPointer.r32 > sizeof(CONSOLE_PORT.RcpuPrintfBuffer) ||
+        CONSOLE_PORT.RcpuHostReadPointer.r32 > sizeof(CONSOLE_PORT.RcpuPrintfBuffer))
     {
         full_init = true;
 
-        SHM.RcpuWritePointer.r32 = 0;
-        SHM.RcpuReadPointer.r32 = 0;
-        SHM.RcpuHostReadPointer.r32 = 0;
+        CONSOLE_PORT.RcpuWritePointer.r32 = 0;
+        CONSOLE_PORT.RcpuReadPointer.r32 = 0;
+        CONSOLE_PORT.RcpuHostReadPointer.r32 = 0;
     }
+#endif
 
     printf("APE v" STRINGIFY(VERSION_MAJOR) "." STRINGIFY(VERSION_MINOR) "." STRINGIFY(VERSION_PATCH) " NCSI Port " STRINGIFY(NETWORK_PORT) "\n");
     gPort = Network_getPort(NETWORK_PORT);
