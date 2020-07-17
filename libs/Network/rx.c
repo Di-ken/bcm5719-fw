@@ -197,7 +197,7 @@ bool Network_PassthroughRxPatcket(NetworkPort_t *port)
 
                 if (!max_loops)
                 {
-                    printf("Error waiting for fifo space. Network may be down.");
+                    printf("Error waiting for fifo space. Network may be down.\n");
                     // Drop all packets that remain and exit.
                     retire.bits.Head = blockid;
                     retire.bits.Tail = rxbuf.bits.Tail;
@@ -263,6 +263,13 @@ bool Network_PassthroughRxPatcket(NetworkPort_t *port)
     }
     else
     {
+        RegAPERxPoolModeStatus_t rxmode;
+        rxmode = *((RegAPERxPoolModeStatus_t *)port->rx_mode);
+        if (rxmode.bits.Error) {
+            printf("RX Error, resetting.\n");
+            Network_resetRX(port);
+        }
+
         return false;
     }
 }
